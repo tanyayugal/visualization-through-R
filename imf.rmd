@@ -1,0 +1,77 @@
+#dataset : https://data.imf.org/?sk=388dfa60-1d26-4ade-b505-a05a558d9a42&sid=1479329334655
+
+#libraries 
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(scales)
+library(kableExtra)
+
+
+imf <- read.csv("inflation-1.csv")
+
+kable(imf,
+      digits = 3,
+      format = "html",
+      row.names = TRUE) %>%
+  kable_styling(
+    bootstrap_options = c("striped"),
+    full_width = F,
+    font_size = 12
+  ) %>%
+  column_spec(column = 3, width = "8em")) 
+
+
+#Transform the data from wide format to long format.
+imf %>% gather(countries, rates, US:Europe) -> imf_long
+
+#Make the *country* variable into an ordered factor
+imf_long$countries <-
+  factor(imf_long$countries,
+         levels = c('US', 'India', 'china', 'Europe'))
+
+#plotting using ggplot
+g <-
+  ggplot(data=imf_long, aes(x=years,y=rates,color=countries))
+  geom_point(alpha = 0.2,
+             size = 1,
+             na.rm = TRUE) + geom_smooth(method = "loess")
+  g + theme_light()
+
+y <- ggplot(data = imf_long, aes (x = years,y= rates,color=countries)) + geom_point(alpha = 0.2,
+             size = 1,
+             na.rm = TRUE) +  geom_sf_label()
+                                                                                                                             
+                                                                                                                            
+y + theme_minimal()
+
+r <- g +
+  theme(
+    legend.text = element_text(linewidth = 8),
+    legend.title = element_blank(),
+  legend.position.inside = c(0.3, 0.99), # move to the top
+    legend.direction = "horizontal", # make it horizontal
+    legend.key.size = unit(0.9, "line"),
+    legend.spacing.x = unit(0.1, 'cm'),
+    legend.background = element_rect(
+      fill = "white",
+      linewidth = 0.5,
+      colour = "white"
+    )
+  )
+
+g
+  g + geom_smooth(
+    data = imf_long,
+    aes(x = years, y = rates, color = countries),
+    method = "loess",
+    span = 0.2,
+    size = 0.9,
+    na.rm = TRUE,
+    se = FALSE,
+    inherit.aes = FALSE
+  )
+
+r + theme_minimal()
