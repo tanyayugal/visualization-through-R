@@ -1,0 +1,95 @@
+#database:https://cimsdbie.rbi.org.in/BOE/OpenDocument/2311211338/OpenDocument/opendoc/openDocument.jsp?logonSuccessful=true&shareId=0
+
+
+fer<-read.csv("forex.csv")
+
+library(dplyr)
+library(igraph)
+library(forcats)
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(scales)
+library(kableExtra)
+
+
+
+kable(fer,
+      digits = 2,
+      format = "html",
+      row.names = TRUE) %>%
+  kable_styling(
+    bootstrap_options = c("striped"),
+    full_width = F,
+    font_size = 12)
+
+
+# selecting data for 2022 only
+rm(fer_long)
+g <- slice(fer,1)
+summarise(sum(fer)
+fer_2022 <- fer%>%select(X2022)%>%summarise(sum(X2022))
+fer_2022_prop <- round(fer_2022*100/sum(fer_2022),0)
+
+
+
+# add a shortened name for each reserve
+forEx$short <- c("SDR", "GLD", "FCA", "TP")
+
+# add a display label for each reserve
+forEx$label <- paste0(forEx$short,":",forEx$X2022_prop,"%")
+
+head(forEx)
+
+
+library(scales)
+
+# possible colours
+mycols <- c('#a6cee3','#1f78b4','#fb9a99','#b2df8a','#e31a1c','#ff7f00','#fdbf6f','#33a02c','#cab2d6')
+
+
+reserve.colours <- c('SDR' = '#1f78b4', 'GLD' = '#b2df8a', 'FCA' ='#fb9a99', 'TP' = '#fdbf6f')
+
+
+library(ggrepel)
+
+set.seed(42)
+
+# sort by 2020 seats a
+ForEx <-forEx %>%mutate(reserves = fct_reorder(reserves, -X2022))%>%arrange(-X2022)
+
+# compute the position of the text labels as the cumulative sum of the proportion:
+# Arrange the grouping variable (short) in descending order. This is important to compute the y coordinates of labels.
+
+
+ForEx <- forEx %>%
+  arrange(desc(short)) %>%
+  mutate(lab.ypos = cumsum(forEx$X2022_prop) 
+         - 0.5*forEx$2022_prop)
+
+
+ggplot(forEx, aes(x = "", y = X2022_prop, fill = short)) +
+  geom_bar(width = 1, stat = "identity", color = "blue", size=0.1, ) +
+  coord_polar("y", start = 0) + geom_text(aes(label=paste0(X2022_prop,"%"))) + scale_fill_brewer(palette="Blues")+
+  theme_minimal()
+  
+
+
+#Why not a square pie chart ?
+
+devtools::install_github("hrbrmstr/waffle")
+library(waffle)
+
+p <- waffle(forEx, title = "Reserves in 2022")
+p + theme_classic()
+
+plotdata <- forEx%>% count(color) %>% arrange(desc(color)) %>% mutate(prop = round(n * 100 / sum(n), 1),lab.ypos = cumsum(prop) - 0.5 *prop) ggplot(plotdata,aes(x = "", y = prop, fill = color))+geom_bar(width = 1,stat = "identity", color = "black")+coord_polar("y", start = 0, direction = -1)+theme_void()
+
+
+
+
+
+
+
